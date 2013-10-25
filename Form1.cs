@@ -37,19 +37,11 @@ namespace UE01
             int width = s.Width;
             int height = s.Height;
 
-            // (try) to get the space each element has
-            // PROBLEM: since they won't fit perfectly, space is wasted -> space calculation fails
-            int availableArea = width * height;
-
-            int areaPerObject = availableArea / (int)(noOfObjects * 1.3); // actually availableArea / noOfObjects, but see problem
-            int size = (int)Math.Sqrt(areaPerObject);
-
-            int column = 0, row = 0;
+            int size = calculateSize(width, height, noOfObjects); 
 
             // generate a random number of elements to displa
             Random generator = new Random();
-
-            // create number of elements (according to randomly generated number)
+            int column = 0, row = 0;
             
             for (int i = 0; i < objects.Length; i++)
             {
@@ -103,12 +95,7 @@ namespace UE01
             int width = s.Width;
             int height = s.Height;
 
-            // (try) to get the space each element has
-            // PROBLEM: since they won't fit perfectly, space is wasted -> space calculation fails
-            int availableArea = width * height;
-
-            int areaPerObject = availableArea / (int)(noOfObjects * 1.3); // actually availableArea / noOfObjects, but see problem
-            int size = (int)Math.Sqrt(areaPerObject);
+            int size = calculateSize(width, height, noOfObjects);
 
             int column = 0, row = 0;
 
@@ -133,6 +120,62 @@ namespace UE01
 
             //addObjects();
             //Refresh();
+        }
+
+        //<summary>
+        // calculates size of elements when given window width / height and no of objects
+        //</summary>
+        private int calculateSize(int width, int height, int noOfObjects)
+        {
+            #region old algorithm
+            /*// (try) to get the space each element has
+            // PROBLEM: since they won't fit perfectly, space is wasted -> space calculation fails
+            int availableArea = width * height;
+
+            // get area per object and since they are squares, get width and height
+            int areaPerObject = availableArea / noOfObjects;
+            int size = (int)Math.Sqrt(areaPerObject);
+
+            // simply counting how many elements fit in a row
+            int elementsInRow = 0;
+            for (int i = 0; ((i + 1) * size) <= width; i++, elementsInRow++) { }
+
+            // calculate the space that is wasted per row
+            int wasted = width - elementsInRow * size;
+
+
+            double wastedPerCent = ((double)wasted / (double)width * 100) / 100;
+            
+            //int test = size;
+            size = (int)(size * (1 - wastedPerCent));
+            
+            //this.Text = width + " " + wasted + " " + wastedPerCent + " " + (1-wastedPerCent) + " " + test + " " + size;*/
+            #endregion
+            // try to find optimum size, getting closer from both ends
+            double high = (double)Math.Max(width, height);
+            double low = 0.0;
+            double mid;
+            double midval;
+
+            while (Math.Abs(high - low) > 0.000001)
+            {
+                mid = (low + high) / 2;
+                midval = (double)((Math.Floor(width / mid) * Math.Floor(height / mid)));
+
+                if (midval >= noOfObjects)
+                {
+                    low = mid;
+                }
+                else
+                {
+                    high = mid;
+                }
+            }
+
+            double test = (Math.Min(width / Math.Floor(width / low), high / Math.Floor(high / low)));
+            int size = (int)test;
+            this.Text = size + " " + test;
+            return size;
         }
 
         #region stuff I don't need
